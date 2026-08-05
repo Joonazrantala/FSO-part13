@@ -62,8 +62,7 @@ router.delete("/:id", tokenExtractor, async (req, res, next) => {
 router.put("/:id", async (req, res, next) => {
   try {
     const blog = await Blog.findByPk(req.params.id)
-    const likes = blog.likes
-    blog.likes = likes + 1
+    blog.likes = req.body.likes
     await blog.save()
     return res.json(blog)
   } catch(error) {
