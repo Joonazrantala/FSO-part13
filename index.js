@@ -11,6 +11,7 @@ const authorsRouter = require("./controllers/authors")
 const resetRouter = require("./controllers/reset")
 const getRouter = require("./controllers/get")
 const {errorHandler, tokenExtractor} = require("./util/middleware")
+const { sync } = require('./models/blog')
 
 app.use(express.json())
 
@@ -25,6 +26,7 @@ app.use(errorHandler)
 
 const start = async () => {
   await connectToDatabase()
+
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
   })
