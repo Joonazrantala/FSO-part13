@@ -10,6 +10,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db?sslmode=disable
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db?sslmode=disable
+      PORT: 3001
+      SECRET: test_secret
+
     services:
       postgres:
         image: postgres:17
@@ -27,36 +33,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '24'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
+      - name: Wait for Postgres
+        run: npx wait-on tcp:5432 -t 30000
+
       - name: Start application
         run: npm start > app.log 2>&1 &
-        env:
-          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db?sslmode=disable
-          PORT: 3001
-          SECRET: test_secret
-          
+        # env is already set at job-level
+
       - name: Wait for application to be ready
-        run: npx wait-on http://localhost:3001 -t 30000
-        
+        run: npx wait-on http://localhost:3001 -t 60000
+
       - name: Run tests
         run: npm test
-        env:
-          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db?sslmode=disable
-          PORT: 3001
-          SECRET: test_secret
-      
-      - name: Print application logs on failure
-        if: failure()
-        run: cat app.log
-        
-      - name: Stop application
-        if: always()
-        run: pkill -f "node index.js" || true
