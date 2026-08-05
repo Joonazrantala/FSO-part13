@@ -32,6 +32,5 @@ Blog.init({
   timestamps: false,
   modelName: 'blog'
 })
-Blog.sync()
 
 module.exports = Blog
